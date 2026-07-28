@@ -1,4 +1,4 @@
-package com.example.canchaya.config
+package com.example.canchaYa.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,14 +23,14 @@ class SecurityConfig {
         http
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
-                // Courts endpoints
-                auth.requestMatchers(HttpMethod.GET, "/api/v1/courts/**").permitAll()
+                // Courts endpoints - Corregido para aceptar la ruta exacta y subrutas
+                auth.requestMatchers(HttpMethod.GET, "/api/v1/courts", "/api/v1/courts/**").permitAll()
                 auth.requestMatchers(HttpMethod.POST, "/api/v1/courts").hasRole("ADMIN")
                 auth.requestMatchers(HttpMethod.PUT, "/api/v1/courts/*").hasRole("ADMIN")
                 auth.requestMatchers(HttpMethod.DELETE, "/api/v1/courts/*").hasRole("ADMIN")
 
-                // Slots endpoints
-                auth.requestMatchers(HttpMethod.GET, "/api/v1/slots/**").permitAll()
+                // Slots endpoints - Corregido para aceptar la ruta exacta y subrutas
+                auth.requestMatchers(HttpMethod.GET, "/api/v1/slots", "/api/v1/slots/**").permitAll()
                 auth.requestMatchers(HttpMethod.POST, "/api/v1/slots").hasRole("ADMIN")
                 auth.requestMatchers(HttpMethod.PUT, "/api/v1/slots/*").hasRole("ADMIN")
                 auth.requestMatchers(HttpMethod.DELETE, "/api/v1/slots/*").hasRole("ADMIN")
@@ -84,11 +84,11 @@ class SecurityConfig {
     //     return JwtDecoder { token ->
     //         val parts = token.split(".")
     //         if (parts.size != 3) throw RuntimeException("Invalid JWT")
-    //         
+    //
     //         val payload = String(java.util.Base64.getUrlDecoder().decode(parts[1]))
     //         val mapper = com.fasterxml.jackson.databind.ObjectMapper()
     //         val claims = mapper.readValue(payload, Map::class.java) as Map<String, Any>
-    // 
+    //
     //         Jwt.withTokenValue(token)
     //             .header("alg", "none")
     //             .claims { it.putAll(claims) }

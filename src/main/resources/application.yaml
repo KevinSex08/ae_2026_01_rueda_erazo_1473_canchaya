@@ -9,7 +9,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/canchaya
     username: postgres
-    password: password
+    password: Kevinsex250806@
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -24,5 +24,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # Temporary issuer-uri for testing, will need real Cognito User Pool URL later
           issuer-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_idLO2Of02
