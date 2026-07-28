@@ -16,7 +16,10 @@ import org.springframework.security.web.SecurityFilterChain
 class SecurityConfig {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityFilterChain(
+        http: HttpSecurity,
+        jwtAuthenticationConverter: JwtAuthenticationConverter
+    ): SecurityFilterChain {
         http
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
@@ -54,7 +57,7 @@ class SecurityConfig {
             }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
-                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
+                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
                 }
             }
 
@@ -76,20 +79,20 @@ class SecurityConfig {
     // THIS IS FOR TESTING PURPOSES ONLY.
     // It accepts ANY JWT token (even fake ones) for easy Postman testing without a real Cognito instance.
     // In a real environment, you would just rely on the `spring.security.oauth2.resourceserver.jwt.issuer-uri`
-    @Bean
-    fun customJwtDecoder(): JwtDecoder {
-        return JwtDecoder { token ->
-            val parts = token.split(".")
-            if (parts.size != 3) throw RuntimeException("Invalid JWT")
-            
-            val payload = String(java.util.Base64.getUrlDecoder().decode(parts[1]))
-            val mapper = com.fasterxml.jackson.databind.ObjectMapper()
-            val claims = mapper.readValue(payload, Map::class.java) as Map<String, Any>
-
-            Jwt.withTokenValue(token)
-                .header("alg", "none")
-                .claims { it.putAll(claims) }
-                .build()
-        }
-    }
+    // @Bean
+    // fun customJwtDecoder(): JwtDecoder {
+    //     return JwtDecoder { token ->
+    //         val parts = token.split(".")
+    //         if (parts.size != 3) throw RuntimeException("Invalid JWT")
+    //         
+    //         val payload = String(java.util.Base64.getUrlDecoder().decode(parts[1]))
+    //         val mapper = com.fasterxml.jackson.databind.ObjectMapper()
+    //         val claims = mapper.readValue(payload, Map::class.java) as Map<String, Any>
+    // 
+    //         Jwt.withTokenValue(token)
+    //             .header("alg", "none")
+    //             .claims { it.putAll(claims) }
+    //             .build()
+    //     }
+    // }
 }

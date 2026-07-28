@@ -1,7 +1,7 @@
 server:
   port: 8080
-  servlet:
-    context-path: /api/v1
+  # servlet:
+  #   context-path: /api/v1
 
 spring:
   application:
@@ -25,4 +25,4 @@ spring:
       resourceserver:
         jwt:
           # Temporary issuer-uri for testing, will need real Cognito User Pool URL later
-          issuer-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXX
+          issuer-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_idLO2Of02
