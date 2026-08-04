@@ -7,22 +7,24 @@ import com.example.canchaya.exception.ResourceNotFoundException
 import com.example.canchaya.mapper.toDto
 import com.example.canchaya.repository.CourtRepository
 import com.example.canchaya.repository.SlotRepository
+import com.example.canchaya.repository.ReservationRepository
+import com.example.canchaya.entity.enums.ReservationStatus
 import org.springframework.stereotype.Service
 
 @Service
 class SlotService(
     private val slotRepository: SlotRepository,
-    private val courtRepository: CourtRepository
+    private val courtRepository: CourtRepository,
+    private val reservationRepository: ReservationRepository
 ) {
 
     fun getAllSlots(): List<SlotDto> {
-        return slotRepository.findAll().map { it.toDto() }
-    }
-
-    fun getAvailableSlots(): List<SlotDto> {
-        // Here we could filter slots that don't have reservations, but for now we just return all
-        // In a real scenario, we would check the Reservation table to exclude booked ones
-        return slotRepository.findAll().map { it.toDto() }
+        val confirmedReservations = reservationRepository.findAll().filter { it.status == ReservationStatus.CONFIRMED }
+        val confirmedSlotIds = confirmedReservations.flatMap { 
+            listOfNotNull(it.slot.id, it.slot2?.id)
+        }.toSet()
+        
+        return slotRepository.findAll().map { it.toDto(available = !confirmedSlotIds.contains(it.id)) }
     }
 
     fun getSlotById(id: Long): SlotDto {

@@ -1,5 +1,6 @@
 package com.example.canchaya.entity
 
+import com.example.canchaYa.entity.BaseEntity
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -23,4 +24,4 @@ class Slot(
 
     @Column(nullable = false, precision = 10, scale = 2)
     var price: BigDecimal
-)
+) : BaseEntity()

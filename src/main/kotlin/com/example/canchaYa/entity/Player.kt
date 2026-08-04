@@ -1,5 +1,6 @@
 package com.example.canchaya.entity
 
+import com.example.canchaYa.entity.BaseEntity
 import com.example.canchaya.entity.enums.Team
 import jakarta.persistence.*
 
@@ -20,4 +21,4 @@ class Player(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var team: Team
-)
+) : BaseEntity()

@@ -9,17 +9,18 @@ fun Court.toDto() = CourtDto(
     isIndoor = isIndoor
 )
 
-fun Slot.toDto() = SlotDto(
+fun Slot.toDto(available: Boolean = true) = SlotDto(
     id = id,
     courtId = court.id,
     startTime = startTime,
     endTime = endTime,
-    price = price
+    price = price,
+    available = available
 )
 
 fun Reservation.toDto() = ReservationDto(
     id = id,
-    slotId = slot.id,
+    slotIds = if (slot2 != null) listOf(slot.id, slot2!!.id) else listOf(slot.id),
     cognitoUserId = cognitoUserId,
     gameType = gameType,
     status = status,

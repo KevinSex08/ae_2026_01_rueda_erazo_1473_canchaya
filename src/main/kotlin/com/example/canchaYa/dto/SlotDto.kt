@@ -8,7 +8,8 @@ data class SlotDto(
     val courtId: Long,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val price: BigDecimal
+    val price: BigDecimal,
+    val available: Boolean
 )
 
 data class SlotRequest(

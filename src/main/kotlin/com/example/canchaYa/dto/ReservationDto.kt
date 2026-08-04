@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 data class ReservationDto(
     val id: Long,
-    val slotId: Long,
+    val slotIds: List<Long>,
     val cognitoUserId: String,
     val gameType: GameType,
     val status: ReservationStatus,
@@ -14,6 +14,6 @@ data class ReservationDto(
 )
 
 data class ReservationRequest(
-    val slotId: Long,
+    val slotIds: List<Long>,
     val gameType: GameType
 )

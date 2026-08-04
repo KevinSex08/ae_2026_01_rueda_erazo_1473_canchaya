@@ -11,3 +11,6 @@ class UnauthorizedException(message: String) : RuntimeException(message)
 
 @ResponseStatus(HttpStatus.FORBIDDEN)
 class ForbiddenException(message: String) : RuntimeException(message)
+
+@ResponseStatus(HttpStatus.CONFLICT)
+class ConflictException(message: String) : RuntimeException(message)
