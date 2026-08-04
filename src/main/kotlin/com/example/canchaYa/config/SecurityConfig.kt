@@ -10,6 +10,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -21,6 +24,7 @@ class SecurityConfig {
         jwtAuthenticationConverter: JwtAuthenticationConverter
     ): SecurityFilterChain {
         http
+            .cors { }
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 // Courts endpoints - Corregido para aceptar la ruta exacta y subrutas
@@ -95,4 +99,17 @@ class SecurityConfig {
     //             .build()
     //     }
     // }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        val frontendUrl = System.getenv("FRONTEND_URL") ?: "http://localhost:3000"
+        configuration.allowedOrigins = listOf(frontendUrl, "http://localhost:8080") // Strict origins
+        configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+        configuration.allowedHeaders = listOf("Authorization", "Cache-Control", "Content-Type")
+        configuration.allowCredentials = true
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
+    }
 }
