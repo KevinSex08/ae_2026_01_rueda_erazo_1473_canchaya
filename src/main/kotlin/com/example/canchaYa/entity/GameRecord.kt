@@ -1,5 +1,6 @@
 package com.example.canchaya.entity
 
+import com.example.canchaYa.entity.BaseEntity
 import com.example.canchaya.entity.enums.Team
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -30,4 +31,4 @@ class GameRecord(
     @Enumerated(EnumType.STRING)
     @Column(name = "winner_team", nullable = false)
     var winnerTeam: Team = Team.NONE
-)
+) : BaseEntity()

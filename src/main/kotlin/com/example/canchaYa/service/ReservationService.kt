@@ -3,7 +3,9 @@ package com.example.canchaya.service
 import com.example.canchaya.dto.ReservationDto
 import com.example.canchaya.dto.ReservationRequest
 import com.example.canchaya.entity.Reservation
+import com.example.canchaya.entity.enums.GameType
 import com.example.canchaya.entity.enums.ReservationStatus
+import com.example.canchaya.exception.ConflictException
 import com.example.canchaya.exception.ForbiddenException
 import com.example.canchaya.exception.ResourceNotFoundException
 import com.example.canchaya.mapper.toDto
@@ -18,11 +20,48 @@ class ReservationService(
 ) {
 
     fun createReservation(request: ReservationRequest, cognitoUserId: String): ReservationDto {
-        val slot = slotRepository.findById(request.slotId).orElseThrow {
-            ResourceNotFoundException("Slot with id ${request.slotId} not found")
+        // Validate gameType and slotIds
+        if (request.gameType == GameType.SUPER_8 && request.slotIds.size != 2) {
+            throw IllegalArgumentException("SUPER_8 game type requires exactly 2 slot IDs")
         }
+        if (request.gameType != GameType.SUPER_8 && request.slotIds.size != 1) {
+            throw IllegalArgumentException("This game type requires exactly 1 slot ID")
+        }
+
+        // Validate duplicates and availability
+        val allReservations = reservationRepository.findAll()
+        for (slotId in request.slotIds) {
+            // Check if slot is already confirmed
+            val isConfirmed = allReservations.any {
+                it.status == ReservationStatus.CONFIRMED && (it.slot.id == slotId || it.slot2?.id == slotId)
+            }
+            if (isConfirmed) {
+                throw ConflictException("Slot with id $slotId is already confirmed")
+            }
+
+            // Check if the user already requested this slot
+            val userAlreadyRequested = allReservations.any {
+                it.cognitoUserId == cognitoUserId &&
+                it.status in listOf(ReservationStatus.PENDING, ReservationStatus.CONFIRMED) &&
+                (it.slot.id == slotId || it.slot2?.id == slotId)
+            }
+            if (userAlreadyRequested) {
+                throw ConflictException("You have already requested slot $slotId")
+            }
+        }
+
+        val slot1 = slotRepository.findById(request.slotIds[0]).orElseThrow {
+            ResourceNotFoundException("Slot with id ${request.slotIds[0]} not found")
+        }
+        val slot2 = if (request.slotIds.size > 1) {
+            slotRepository.findById(request.slotIds[1]).orElseThrow {
+                ResourceNotFoundException("Slot with id ${request.slotIds[1]} not found")
+            }
+        } else null
+
         val reservation = Reservation(
-            slot = slot,
+            slot = slot1,
+            slot2 = slot2,
             cognitoUserId = cognitoUserId,
             gameType = request.gameType,
             status = ReservationStatus.PENDING
@@ -56,10 +95,26 @@ class ReservationService(
     }
 
     fun confirmReservation(id: Long): ReservationDto {
-        val reservation = reservationRepository.findById(id).orElseThrow {
+        val reservationToConfirm = reservationRepository.findById(id).orElseThrow {
             ResourceNotFoundException("Reservation with id $id not found")
         }
-        reservation.status = ReservationStatus.CONFIRMED
-        return reservationRepository.save(reservation).toDto()
+        reservationToConfirm.status = ReservationStatus.CONFIRMED
+        reservationRepository.save(reservationToConfirm)
+
+        val confirmedSlotIds = listOfNotNull(reservationToConfirm.slot.id, reservationToConfirm.slot2?.id)
+
+        // Cancel other pending reservations that request the same slots
+        val pendingReservations = reservationRepository.findAll().filter { it.status == ReservationStatus.PENDING }
+        for (pending in pendingReservations) {
+            if (pending.id != id) {
+                val pendingSlotIds = listOfNotNull(pending.slot.id, pending.slot2?.id)
+                if (pendingSlotIds.any { it in confirmedSlotIds }) {
+                    pending.status = ReservationStatus.CANCELLED
+                    reservationRepository.save(pending)
+                }
+            }
+        }
+
+        return reservationToConfirm.toDto()
     }
 }

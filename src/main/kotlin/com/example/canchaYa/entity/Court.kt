@@ -1,5 +1,6 @@
 package com.example.canchaya.entity
 
+import com.example.canchaYa.entity.BaseEntity
 import jakarta.persistence.*
 
 @Entity
@@ -14,4 +15,4 @@ class Court(
 
     @Column(nullable = false, name = "is_indoor")
     var isIndoor: Boolean = false
-)
+) : BaseEntity()

@@ -1,9 +1,9 @@
 package com.example.canchaya.entity
 
+import com.example.canchaYa.entity.BaseEntity
 import com.example.canchaya.entity.enums.GameType
 import com.example.canchaya.entity.enums.ReservationStatus
 import jakarta.persistence.*
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "reservations")
@@ -27,6 +27,7 @@ class Reservation(
     @Column(nullable = false)
     var status: ReservationStatus,
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now()
-)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "slot2_id")
+    var slot2: Slot? = null
+) : BaseEntity()
