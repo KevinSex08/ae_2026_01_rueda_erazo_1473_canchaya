@@ -1,51 +1,116 @@
 services:
-  postgres_db:
-    image: postgres:14
+  canchaya-db:
+    image: postgres:16-alpine
     env_file:
       - .env
     environment:
-      POSTGRES_DB: ${DB_NAME:-postgres}
-      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_DB: ${DB_NAME:-canchaya}
+      POSTGRES_USER: ${DB_USER:-canchaya_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-Kevinsex250806@}
-    ports:
-      - "${DB_PORT:-5432}:5432"
+    expose:
+      - "5432"
     volumes:
       - canchaya_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-canchaya_user} -d ${DB_NAME:-canchaya}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_duration=on"]
     networks:
-      - canchaya_network
+      - ae_network
 
-  backend:
+  users-db:
+    image: postgres:16-alpine
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: users_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Kevinsex250806@}
+    expose:
+      - "5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U users_user -d users"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_duration=on"]
+    networks:
+      - ae_network
+
+  canchaya:
     build:
-      context: ./canchaYa
+      context: ./canchaya
       dockerfile: Dockerfile
     expose:
       - "8080"
     env_file:
       - .env
     environment:
-      - DB_HOST=postgres_db
+      - DB_HOST=canchaya-db
       - DB_PORT=5432
-      - DB_NAME=${DB_NAME:-postgres}
-      - DB_USER=${DB_USER:-postgres}
+      - DB_NAME=${DB_NAME:-canchaya}
+      - DB_USER=${DB_USER:-canchaya_user}
       - DB_PASSWORD=${DB_PASSWORD:-Kevinsex250806@}
+      - COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
     depends_on:
-      - postgres_db
+      canchaya-db:
+        condition: service_healthy
     networks:
-      - canchaya_network
+      - ae_network
+
+  users:
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    expose:
+      - "8081"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=users-db
+      - DB_PORT=5432
+      - DB_NAME=users
+      - DB_USER=users_user
+      - DB_PASSWORD=${DB_PASSWORD:-Kevinsex250806@}
+      - COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
+    depends_on:
+      users-db:
+        condition: service_healthy
+    networks:
+      - ae_network
 
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"
+      - "9090:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - backend
+      - canchaya
+      - users
     networks:
-      - canchaya_network
+      - ae_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - canchaya-db
+      - users-db
+    networks:
+      - ae_network
 
 volumes:
   canchaya_data:
+  users_data:
 
 networks:
-  canchaya_network:
+  ae_network:
