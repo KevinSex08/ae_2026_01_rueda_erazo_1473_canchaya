@@ -1,0 +1,51 @@
+services:
+  postgres_db:
+    image: postgres:14
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Kevinsex250806@}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - canchaya_data:/var/lib/postgresql/data
+    networks:
+      - canchaya_network
+
+  backend:
+    build:
+      context: ./canchaYa
+      dockerfile: Dockerfile
+    expose:
+      - "8080"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres_db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-postgres}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-Kevinsex250806@}
+    depends_on:
+      - postgres_db
+    networks:
+      - canchaya_network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - canchaya_network
+
+volumes:
+  canchaya_data:
+
+networks:
+  canchaya_network:
