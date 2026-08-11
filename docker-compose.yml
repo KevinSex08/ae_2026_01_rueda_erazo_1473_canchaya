@@ -43,7 +43,7 @@ services:
 
   canchaya:
     build:
-      context: ./canchaya
+      context: ./canchaYa
       dockerfile: Dockerfile
     expose:
       - "8080"
@@ -55,6 +55,9 @@ services:
       - DB_NAME=${DB_NAME:-canchaya}
       - DB_USER=${DB_USER:-canchaya_user}
       - DB_PASSWORD=${DB_PASSWORD:-Kevinsex250806@}
+      - COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID}
+      - COGNITO_APP_CLIENT_ID=${COGNITO_APP_CLIENT_ID}
+      - AWS_REGION=${AWS_REGION}
       - COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
     depends_on:
       canchaya-db:
@@ -76,6 +79,9 @@ services:
       - DB_NAME=users
       - DB_USER=users_user
       - DB_PASSWORD=${DB_PASSWORD:-Kevinsex250806@}
+      - COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID}
+      - COGNITO_APP_CLIENT_ID=${COGNITO_APP_CLIENT_ID}
+      - AWS_REGION=${AWS_REGION}
       - COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
     depends_on:
       users-db:
