@@ -2,12 +2,15 @@ package com.example.canchaYa.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.convert.converter.Converter
 import org.springframework.http.HttpMethod
+import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
@@ -20,8 +23,7 @@ class SecurityConfig {
 
     @Bean
     fun securityFilterChain(
-        http: HttpSecurity,
-        jwtAuthenticationConverter: JwtAuthenticationConverter
+        http: HttpSecurity
     ): SecurityFilterChain {
         http
             .cors { }
@@ -61,7 +63,7 @@ class SecurityConfig {
             }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
-                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
+                    jwt.jwtAuthenticationConverter(customJwtAuthenticationConverter())
                 }
             }
 
@@ -69,36 +71,24 @@ class SecurityConfig {
     }
 
     @Bean
-    fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
-        val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
-        // Cognito groups or custom claims to Spring roles
-        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_")
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("cognito:groups") // Usually Cognito puts roles in groups
+    fun customJwtAuthenticationConverter(): Converter<Jwt, AbstractAuthenticationToken> {
+        return Converter { jwt ->
+            val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
+            grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_")
+            grantedAuthoritiesConverter.setAuthoritiesClaimName("cognito:groups")
 
-        val jwtAuthenticationConverter = JwtAuthenticationConverter()
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter)
-        return jwtAuthenticationConverter
+            val authorities = grantedAuthoritiesConverter.convert(jwt)?.toMutableList() ?: mutableListOf()
+
+            // Si el usuario no tiene grupos en Cognito, le asignamos ROLE_PLAYER por defecto
+            // para que pueda acceder a /api/v1/reservations/my sin configuraciones extra en AWS.
+            val hasRoles = authorities.any { it.authority.startsWith("ROLE_") }
+            if (!hasRoles) {
+                authorities.add(SimpleGrantedAuthority("ROLE_PLAYER"))
+            }
+
+            JwtAuthenticationToken(jwt, authorities)
+        }
     }
-
-    // THIS IS FOR TESTING PURPOSES ONLY.
-    // It accepts ANY JWT token (even fake ones) for easy Postman testing without a real Cognito instance.
-    // In a real environment, you would just rely on the `spring.security.oauth2.resourceserver.jwt.issuer-uri`
-    // @Bean
-    // fun customJwtDecoder(): JwtDecoder {
-    //     return JwtDecoder { token ->
-    //         val parts = token.split(".")
-    //         if (parts.size != 3) throw RuntimeException("Invalid JWT")
-    //
-    //         val payload = String(java.util.Base64.getUrlDecoder().decode(parts[1]))
-    //         val mapper = com.fasterxml.jackson.databind.ObjectMapper()
-    //         val claims = mapper.readValue(payload, Map::class.java) as Map<String, Any>
-    //
-    //         Jwt.withTokenValue(token)
-    //             .header("alg", "none")
-    //             .claims { it.putAll(claims) }
-    //             .build()
-    //     }
-    // }
 
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
