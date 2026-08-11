@@ -43,7 +43,7 @@ services:
 
   canchaya:
     build:
-      context: ./canchaYa
+      context: ./canchaya
       dockerfile: Dockerfile
     expose:
       - "8080"
