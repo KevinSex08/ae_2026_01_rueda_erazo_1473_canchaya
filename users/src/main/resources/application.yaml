@@ -19,6 +19,18 @@ spring:
         jwt:
           issuer-uri: ${COGNITO_ISSUER_URI}
 
+cognito:
+  user-pool-id: ${COGNITO_USER_POOL_ID}
+  client-id: ${COGNITO_APP_CLIENT_ID}
+  region: ${AWS_REGION}
+
+cors:
+  allowed-origins:
+    - "http://localhost:8100"
+    - "capacitor://localhost"
+    - "http://localhost"
+    - "http://localhost:3000"
+
 server:
   port: 8081
 

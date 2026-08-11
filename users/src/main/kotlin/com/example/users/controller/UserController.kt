@@ -15,13 +15,13 @@ class UserController(private val userService: UserService) {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     fun register(@AuthenticationPrincipal jwt: Jwt, @RequestBody request: UserRequest): UserDto {
-        val cognitoSub = jwt.subject
+        val cognitoSub = jwt.subject!!
         return userService.registerUser(cognitoSub, request)
     }
 
     @GetMapping("/me")
     fun getMe(@AuthenticationPrincipal jwt: Jwt): UserDto {
-        val cognitoSub = jwt.subject
+        val cognitoSub = jwt.subject!!
         return userService.getCurrentUser(cognitoSub)
     }
 }
