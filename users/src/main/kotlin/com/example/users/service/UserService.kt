@@ -33,10 +33,25 @@ class UserService(private val userRepository: UserRepository) {
                 ?: jwt.getClaimAsString("given_name") 
                 ?: jwt.getClaimAsString("email")?.substringBefore("@")
                 ?: existingUser.name
+            
+            // Sync Cognito groups as role
+            val groups = jwt.getClaimAsStringList("cognito:groups") ?: emptyList()
+            val expectedRole = if (groups.contains("ADMIN")) "ADMIN" else "PLAYER"
                 
+            var modified = false
             // Actualiza el nombre si en la base de datos estaba como un UUID o es diferente
             if (existingUser.name != tokenName) {
                 existingUser.name = tokenName
+                modified = true
+            }
+            if (existingUser.role != expectedRole && groups.contains("ADMIN")) {
+                // If Cognito says ADMIN but DB says PLAYER, upgrade them.
+                // We don't automatically downgrade admins just in case they were promoted directly in DB.
+                existingUser.role = "ADMIN"
+                modified = true
+            }
+
+            if (modified) {
                 userRepository.save(existingUser)
             } else {
                 existingUser
