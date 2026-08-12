@@ -27,6 +27,22 @@ class SlotService(
         return slotRepository.findAll().map { it.toDto(available = !confirmedSlotIds.contains(it.id)) }
     }
 
+    fun getAvailableSlots(courtId: Long?, date: String?): List<SlotDto> {
+        val slots = if (courtId != null) {
+            slotRepository.findByCourtId(courtId)
+        } else {
+            slotRepository.findAll()
+        }
+        
+        val confirmedReservations = reservationRepository.findAll().filter { it.status == ReservationStatus.CONFIRMED }
+        val confirmedSlotIds = confirmedReservations.flatMap { 
+            listOfNotNull(it.slot.id, it.slot2?.id)
+        }.toSet()
+        
+        // El frontend espera recibir todos los slots de esa cancha con su estado de disponibilidad actualizado
+        return slots.map { it.toDto(available = !confirmedSlotIds.contains(it.id)) }
+    }
+
     fun getSlotById(id: Long): SlotDto {
         val slot = slotRepository.findById(id).orElseThrow {
             ResourceNotFoundException("Slot with id $id not found")

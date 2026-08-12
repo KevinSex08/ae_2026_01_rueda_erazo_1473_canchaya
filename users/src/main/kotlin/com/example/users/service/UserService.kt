@@ -28,7 +28,19 @@ class UserService(private val userRepository: UserRepository) {
         val userOptional = userRepository.findByCognitoSub(cognitoSub)
         
         val user = if (userOptional.isPresent) {
-            userOptional.get()
+            val existingUser = userOptional.get()
+            val tokenName = jwt.getClaimAsString("name") 
+                ?: jwt.getClaimAsString("given_name") 
+                ?: jwt.getClaimAsString("email")?.substringBefore("@")
+                ?: existingUser.name
+                
+            // Actualiza el nombre si en la base de datos estaba como un UUID o es diferente
+            if (existingUser.name != tokenName) {
+                existingUser.name = tokenName
+                userRepository.save(existingUser)
+            } else {
+                existingUser
+            }
         } else {
             // Auto-registro silencioso (First-time login)
             val email = jwt.getClaimAsString("email") ?: "no-email@canchaya.com"
