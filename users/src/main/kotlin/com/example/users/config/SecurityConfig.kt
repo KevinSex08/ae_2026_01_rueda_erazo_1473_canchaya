@@ -16,6 +16,7 @@ class SecurityConfig {
             .cors { it.disable() }
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
+                auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 auth.anyRequest().authenticated()
             }
             .oauth2ResourceServer { oauth2 ->
