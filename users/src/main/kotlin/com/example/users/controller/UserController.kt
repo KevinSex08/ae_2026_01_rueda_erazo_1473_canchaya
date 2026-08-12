@@ -23,4 +23,9 @@ class UserController(private val userService: UserService) {
     fun getMe(@AuthenticationPrincipal jwt: Jwt): UserDto {
         return userService.getCurrentUser(jwt)
     }
+
+    @GetMapping("/all")
+    fun getAllUsers(): List<UserDto> {
+        return userService.getAllUsers()
+    }
 }

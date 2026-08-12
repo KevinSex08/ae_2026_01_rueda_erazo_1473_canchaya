@@ -78,4 +78,10 @@ class UserService(private val userRepository: UserRepository) {
         
         return UserDto(user.id, user.cognitoSub, user.email, user.name, user.role)
     }
+
+    fun getAllUsers(): List<UserDto> {
+        return userRepository.findAll().map { 
+            UserDto(it.id, it.cognitoSub, it.email, it.name, it.role)
+        }
+    }
 }
