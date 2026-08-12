@@ -25,8 +25,8 @@ class ReservationService(
         if (request.gameType == GameType.SUPER_8 && request.slotIds.size != 2) {
             throw IllegalArgumentException("SUPER_8 game type requires exactly 2 slot IDs")
         }
-        if (request.gameType == GameType.TRADITIONAL && request.slotIds.size != 1) {
-            throw IllegalArgumentException("TRADITIONAL game type requires exactly 1 slot ID")
+        if (request.gameType == GameType.CLASSIC && request.slotIds.size != 1) {
+            throw IllegalArgumentException("CLASSIC game type requires exactly 1 slot ID")
         }
 
         val slot1 = slotRepository.findById(request.slotIds[0]).orElseThrow {

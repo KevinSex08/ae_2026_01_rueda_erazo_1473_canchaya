@@ -15,5 +15,5 @@ data class ReservationDto(
 
 data class ReservationRequest(
     val slotIds: List<Long> = emptyList(),
-    val gameType: GameType = GameType.TRADITIONAL
+    val gameType: GameType = GameType.CLASSIC
 )
