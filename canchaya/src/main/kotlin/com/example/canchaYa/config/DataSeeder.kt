@@ -26,24 +26,11 @@ class DataSeeder(
 
         // Define 15 realistic courts belonging to the CanchaYA complex
         val courtsToCreate = listOf(
-            // Indoor courts (Cristal & Panorámica/Premium Glass)
-            Court(name = "CanchaYA - Court 1 Cristal Indoor", isIndoor = true),
-            Court(name = "CanchaYA - Court 2 Cristal Indoor", isIndoor = true),
-            Court(name = "CanchaYA - Court 3 Cristal Indoor", isIndoor = true),
-            Court(name = "CanchaYA - Court 4 Cristal Indoor", isIndoor = true),
-            Court(name = "CanchaYA - Court 5 Panorámica Cristal Indoor", isIndoor = true),
-            Court(name = "CanchaYA - Court 6 Panorámica Cristal Indoor", isIndoor = true),
-            Court(name = "CanchaYA - Court 7 Premium Glass Indoor", isIndoor = true),
-            
-            // Outdoor courts (Cristal & Muro Clásico)
-            Court(name = "CanchaYA - Court 8 Cristal Outdoor", isIndoor = false),
-            Court(name = "CanchaYA - Court 9 Cristal Outdoor", isIndoor = false),
-            Court(name = "CanchaYA - Court 10 Cristal Outdoor", isIndoor = false),
-            Court(name = "CanchaYA - Court 11 Cristal Outdoor", isIndoor = false),
-            Court(name = "CanchaYA - Court 12 Muro Clásico Outdoor", isIndoor = false),
-            Court(name = "CanchaYA - Court 13 Muro Clásico Outdoor", isIndoor = false),
-            Court(name = "CanchaYA - Court 14 Muro Clásico Outdoor", isIndoor = false),
-            Court(name = "CanchaYA - Court 15 Muro Clásico Outdoor", isIndoor = false)
+            // 4 realistic courts belonging to the CanchaYA complex
+            Court(name = "CanchaYA - Cristal Indoor 1", isIndoor = true, pricePerHour = BigDecimal("40.00")),
+            Court(name = "CanchaYA - Panorámica Indoor 2", isIndoor = true, pricePerHour = BigDecimal("45.00")),
+            Court(name = "CanchaYA - Cristal Outdoor 3", isIndoor = false, pricePerHour = BigDecimal("25.00")),
+            Court(name = "CanchaYA - Muro Clásico Outdoor 4", isIndoor = false, pricePerHour = BigDecimal("20.00"))
         )
 
         // Save all courts first

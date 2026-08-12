@@ -4,9 +4,10 @@ import com.example.canchaYa.dto.*
 import com.example.canchaYa.entity.*
 
 fun Court.toDto() = CourtDto(
-    id = id,
-    name = name,
-    isIndoor = isIndoor
+    id = this.id,
+    name = this.name,
+    isIndoor = this.isIndoor,
+    pricePerHour = this.pricePerHour
 )
 
 fun Slot.toDto(available: Boolean = true) = SlotDto(

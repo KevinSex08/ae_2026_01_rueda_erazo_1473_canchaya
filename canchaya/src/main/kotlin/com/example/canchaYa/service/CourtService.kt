@@ -25,7 +25,8 @@ class CourtService(private val courtRepository: CourtRepository) {
     fun createCourt(request: CourtRequest): CourtDto {
         val court = Court(
             name = request.name,
-            isIndoor = request.isIndoor
+            isIndoor = request.isIndoor,
+            pricePerHour = request.pricePerHour
         )
         return courtRepository.save(court).toDto()
     }
@@ -36,6 +37,7 @@ class CourtService(private val courtRepository: CourtRepository) {
         }
         court.name = request.name
         court.isIndoor = request.isIndoor
+        court.pricePerHour = request.pricePerHour
         return courtRepository.save(court).toDto()
     }
 

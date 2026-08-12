@@ -14,5 +14,8 @@ class Court(
     var name: String,
 
     @Column(nullable = false, name = "is_indoor")
-    var isIndoor: Boolean = false
+    var isIndoor: Boolean = false,
+
+    @Column(nullable = false, name = "price_per_hour")
+    var pricePerHour: java.math.BigDecimal = java.math.BigDecimal.ZERO
 ) : BaseEntity()
