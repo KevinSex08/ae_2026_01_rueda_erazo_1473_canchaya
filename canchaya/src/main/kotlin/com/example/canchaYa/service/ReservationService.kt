@@ -19,6 +19,7 @@ class ReservationService(
     private val slotRepository: SlotRepository
 ) {
 
+    @org.springframework.transaction.annotation.Transactional
     fun createReservation(request: ReservationRequest, cognitoUserId: String): ReservationDto {
         // Validate gameType and slotIds
         if (request.gameType == GameType.SUPER_8 && request.slotIds.size != 2) {
@@ -28,15 +29,31 @@ class ReservationService(
             throw IllegalArgumentException("TRADITIONAL game type requires exactly 1 slot ID")
         }
 
-        // Validate duplicates and availability
+        val slot1 = slotRepository.findById(request.slotIds[0]).orElseThrow {
+            ResourceNotFoundException("Slot with id ${request.slotIds[0]} not found")
+        }
+        val slot2 = if (request.slotIds.size > 1) {
+            slotRepository.findById(request.slotIds[1]).orElseThrow {
+                ResourceNotFoundException("Slot with id ${request.slotIds[1]} not found")
+            }
+        } else null
+
+        // Regla 2: Bloqueo del Tiempo Pasado
+        val now = java.time.LocalDateTime.now()
+        if (slot1.startTime.isBefore(now) || (slot2 != null && slot2.startTime.isBefore(now))) {
+            throw IllegalArgumentException("Cannot create a reservation for a past time")
+        }
+
+        // Validate duplicates and availability (Regla 3: Concurrencia - PENDING bloquea)
         val allReservations = reservationRepository.findAll()
         for (slotId in request.slotIds) {
-            // Check if slot is already confirmed
-            val isConfirmed = allReservations.any {
-                it.status == ReservationStatus.CONFIRMED && (it.slot.id == slotId || it.slot2?.id == slotId)
+            // Check if slot is already confirmed or pending
+            val isUnavailable = allReservations.any {
+                it.status in listOf(ReservationStatus.CONFIRMED, ReservationStatus.PENDING) && 
+                (it.slot.id == slotId || it.slot2?.id == slotId)
             }
-            if (isConfirmed) {
-                throw ConflictException("Slot with id $slotId is already confirmed")
+            if (isUnavailable) {
+                throw ConflictException("Slot with id $slotId is already reserved or pending")
             }
 
             // Check if the user already requested this slot
@@ -49,15 +66,6 @@ class ReservationService(
                 throw ConflictException("You have already requested slot $slotId")
             }
         }
-
-        val slot1 = slotRepository.findById(request.slotIds[0]).orElseThrow {
-            ResourceNotFoundException("Slot with id ${request.slotIds[0]} not found")
-        }
-        val slot2 = if (request.slotIds.size > 1) {
-            slotRepository.findById(request.slotIds[1]).orElseThrow {
-                ResourceNotFoundException("Slot with id ${request.slotIds[1]} not found")
-            }
-        } else null
 
         val reservation = Reservation(
             slot = slot1,
