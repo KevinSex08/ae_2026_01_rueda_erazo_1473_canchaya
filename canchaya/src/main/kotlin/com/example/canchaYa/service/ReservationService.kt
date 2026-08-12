@@ -44,8 +44,18 @@ class ReservationService(
             throw IllegalArgumentException("Cannot create a reservation for a past time")
         }
 
-        // Validate duplicates and availability (Regla 3: Concurrencia - PENDING bloquea)
+        // Regla 3: Límite de reservas activas por jugador (Máximo 3)
         val allReservations = reservationRepository.findAll()
+        val activeUserReservations = allReservations.count {
+            it.cognitoUserId == cognitoUserId &&
+            it.status in listOf(ReservationStatus.PENDING, ReservationStatus.CONFIRMED) &&
+            !it.slot.startTime.isBefore(now)
+        }
+        if (activeUserReservations >= 3) {
+            throw ConflictException("You already have the maximum allowed number of active reservations (3). Please play or cancel an existing reservation first.")
+        }
+
+        // Validate duplicates and availability (Regla 4: Concurrencia - PENDING bloquea)
         for (slotId in request.slotIds) {
             // Check if slot is already confirmed or pending
             val isUnavailable = allReservations.any {
