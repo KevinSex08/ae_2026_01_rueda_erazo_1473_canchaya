@@ -17,5 +17,14 @@ class Court(
     var isIndoor: Boolean = false,
 
     @Column(nullable = false, name = "price_per_hour")
-    var pricePerHour: java.math.BigDecimal = java.math.BigDecimal.ZERO
+    var pricePerHour: java.math.BigDecimal = java.math.BigDecimal.ZERO,
+
+    @Column(nullable = true, length = 100)
+    var location: String? = null,
+
+    @Column(nullable = true, length = 50)
+    var type: String? = null,
+
+    @Column(nullable = true, length = 50)
+    var surface: String? = null
 ) : BaseEntity()

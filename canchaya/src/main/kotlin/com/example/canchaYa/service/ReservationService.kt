@@ -88,6 +88,11 @@ class ReservationService(
     }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    fun getAllReservations(): List<ReservationDto> {
+        return reservationRepository.findAll().map { it.toDto() }
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     fun getMyReservations(cognitoUserId: String): List<ReservationDto> {
         return reservationRepository.findByCognitoUserId(cognitoUserId).map { it.toDto() }
     }
