@@ -72,7 +72,7 @@ class ReservationService(
             slot2 = slot2,
             cognitoUserId = cognitoUserId,
             gameType = request.gameType,
-            status = ReservationStatus.PENDING
+            status = ReservationStatus.CONFIRMED
         )
         return reservationRepository.save(reservation).toDto()
     }
