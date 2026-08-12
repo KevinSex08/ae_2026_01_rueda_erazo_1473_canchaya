@@ -28,19 +28,27 @@ class SlotService(
     }
 
     fun getAvailableSlots(courtId: Long?, date: String?): List<SlotDto> {
-        val slots = if (courtId != null) {
+        val allSlots = if (courtId != null) {
             slotRepository.findByCourtId(courtId)
         } else {
             slotRepository.findAll()
         }
         
-        val confirmedReservations = reservationRepository.findAll().filter { it.status == ReservationStatus.CONFIRMED }
-        val confirmedSlotIds = confirmedReservations.flatMap { 
+        // Regla 1 y 2: Filtrar tiempo pasado y horario operativo (10:00 AM a 22:00 PM)
+        val now = java.time.LocalDateTime.now()
+        val validSlots = allSlots.filter { 
+            it.startTime.isAfter(now) && it.startTime.hour in 10..21
+        }
+        
+        // Regla 3: Filtrar reservaciones CONFIRMADAS y PENDIENTES para evitar colisiones concurrentes tempranas
+        val blockingReservations = reservationRepository.findAll().filter { 
+            it.status == ReservationStatus.CONFIRMED || it.status == ReservationStatus.PENDING 
+        }
+        val blockedSlotIds = blockingReservations.flatMap { 
             listOfNotNull(it.slot.id, it.slot2?.id)
         }.toSet()
         
-        // El frontend espera recibir todos los slots de esa cancha con su estado de disponibilidad actualizado
-        return slots.map { it.toDto(available = !confirmedSlotIds.contains(it.id)) }
+        return validSlots.map { it.toDto(available = !blockedSlotIds.contains(it.id)) }
     }
 
     fun getSlotById(id: Long): SlotDto {
