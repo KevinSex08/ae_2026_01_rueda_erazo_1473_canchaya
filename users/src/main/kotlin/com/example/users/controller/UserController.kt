@@ -21,7 +21,6 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("/me")
     fun getMe(@AuthenticationPrincipal jwt: Jwt): UserDto {
-        val cognitoSub = jwt.subject!!
-        return userService.getCurrentUser(cognitoSub)
+        return userService.getCurrentUser(jwt)
     }
 }
