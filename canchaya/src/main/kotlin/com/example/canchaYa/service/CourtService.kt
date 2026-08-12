@@ -25,8 +25,11 @@ class CourtService(private val courtRepository: CourtRepository) {
     fun createCourt(request: CourtRequest): CourtDto {
         val court = Court(
             name = request.name,
-            isIndoor = request.isIndoor,
-            pricePerHour = request.pricePerHour
+            isIndoor = request.type?.equals("INDOOR", ignoreCase = true) ?: request.isIndoor,
+            pricePerHour = request.pricePerHour,
+            location = request.location,
+            type = request.type,
+            surface = request.surface
         )
         return courtRepository.save(court).toDto()
     }
@@ -36,8 +39,11 @@ class CourtService(private val courtRepository: CourtRepository) {
             ResourceNotFoundException("Court with id $id not found")
         }
         court.name = request.name
-        court.isIndoor = request.isIndoor
+        court.isIndoor = request.type?.equals("INDOOR", ignoreCase = true) ?: request.isIndoor
         court.pricePerHour = request.pricePerHour
+        court.location = request.location
+        court.type = request.type
+        court.surface = request.surface
         return courtRepository.save(court).toDto()
     }
 

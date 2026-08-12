@@ -24,6 +24,11 @@ class ReservationController(private val reservationService: ReservationService) 
         return reservationService.createReservation(request, userId)
     }
 
+    @GetMapping
+    fun getAllReservations(): List<ReservationDto> {
+        return reservationService.getAllReservations()
+    }
+
     @GetMapping("/my")
     fun getMyReservations(@AuthenticationPrincipal jwt: Jwt): List<ReservationDto> {
         val userId = jwt.subject ?: jwt.getClaimAsString("username") ?: "unknown"

@@ -54,6 +54,7 @@ class SecurityConfig {
 
                 // Reservations endpoints
                 auth.requestMatchers(HttpMethod.POST, "/api/v1/reservations").hasRole("PLAYER")
+                auth.requestMatchers(HttpMethod.GET, "/api/v1/reservations").hasRole("ADMIN")
                 auth.requestMatchers(HttpMethod.GET, "/api/v1/reservations/my").hasRole("PLAYER")
                 auth.requestMatchers(HttpMethod.GET, "/api/v1/reservations/*").authenticated()
                 auth.requestMatchers(HttpMethod.PATCH, "/api/v1/reservations/*/cancel").hasRole("PLAYER")

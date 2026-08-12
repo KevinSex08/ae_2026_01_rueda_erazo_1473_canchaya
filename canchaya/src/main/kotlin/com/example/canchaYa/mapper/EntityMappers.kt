@@ -7,7 +7,10 @@ fun Court.toDto() = CourtDto(
     id = this.id,
     name = this.name,
     isIndoor = this.isIndoor,
-    pricePerHour = this.pricePerHour
+    pricePerHour = this.pricePerHour,
+    location = this.location,
+    type = this.type,
+    surface = this.surface
 )
 
 fun Slot.toDto(available: Boolean = true) = SlotDto(
