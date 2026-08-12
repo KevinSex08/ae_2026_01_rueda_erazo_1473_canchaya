@@ -77,10 +77,12 @@ class ReservationService(
         return reservationRepository.save(reservation).toDto()
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     fun getMyReservations(cognitoUserId: String): List<ReservationDto> {
         return reservationRepository.findByCognitoUserId(cognitoUserId).map { it.toDto() }
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     fun getReservationById(id: Long, cognitoUserId: String, isAdmin: Boolean): ReservationDto {
         val reservation = reservationRepository.findById(id).orElseThrow {
             ResourceNotFoundException("Reservation with id $id not found")
