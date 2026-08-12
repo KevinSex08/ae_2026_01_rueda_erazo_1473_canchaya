@@ -26,7 +26,7 @@ class SecurityConfig {
         http: HttpSecurity
     ): SecurityFilterChain {
         http
-            .cors { }
+            .cors { it.disable() }
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 // Courts endpoints - Corregido para aceptar la ruta exacta y subrutas
@@ -90,16 +90,4 @@ class SecurityConfig {
         }
     }
 
-    @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource {
-        val configuration = CorsConfiguration()
-        val frontendUrl = System.getenv("FRONTEND_URL") ?: "http://localhost:3000"
-        configuration.allowedOrigins = listOf(frontendUrl, "http://localhost:8080") // Strict origins
-        configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-        configuration.allowedHeaders = listOf("Authorization", "Cache-Control", "Content-Type")
-        configuration.allowCredentials = true
-        val source = UrlBasedCorsConfigurationSource()
-        source.registerCorsConfiguration("/**", configuration)
-        return source
-    }
 }
