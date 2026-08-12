@@ -29,6 +29,9 @@ class SecurityConfig {
             .cors { it.disable() }
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
+                // Permitir peticiones OPTIONS (Preflight) a cualquier ruta
+                auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                 // Courts endpoints - Corregido para aceptar la ruta exacta y subrutas
                 auth.requestMatchers(HttpMethod.GET, "/api/v1/courts", "/api/v1/courts/**").permitAll()
                 auth.requestMatchers(HttpMethod.POST, "/api/v1/courts").hasRole("ADMIN")
