@@ -35,7 +35,8 @@ class SlotService(
         }
         
         // Regla 1 y 2: Filtrar tiempo pasado y horario operativo (10:00 AM a 22:00 PM)
-        val now = java.time.LocalDateTime.now()
+        val ecuadorZone = java.time.ZoneId.of("America/Guayaquil")
+        val now = java.time.LocalDateTime.now(ecuadorZone)
         val validSlots = allSlots.filter { 
             it.startTime.isAfter(now) && it.startTime.hour in 10..21
         }
