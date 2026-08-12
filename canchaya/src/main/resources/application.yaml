@@ -17,12 +17,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${COGNITO_ISSUER_URI}
+          issuer-uri: ${COGNITO_ISSUER_URI:http://localhost}
 
 cognito:
-  user-pool-id: ${COGNITO_USER_POOL_ID}
-  client-id: ${COGNITO_APP_CLIENT_ID}
-  region: ${AWS_REGION}
+  user-pool-id: ${COGNITO_USER_POOL_ID:us-east-1_xxxxx}
+  client-id: ${COGNITO_APP_CLIENT_ID:xxxxx}
+  region: ${AWS_REGION:us-east-1}
 
 cors:
   allowed-origins:

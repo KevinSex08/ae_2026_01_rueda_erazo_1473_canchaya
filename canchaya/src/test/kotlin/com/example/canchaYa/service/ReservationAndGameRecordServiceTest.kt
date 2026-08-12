@@ -63,7 +63,7 @@ class ReservationAndGameRecordServiceTest {
         courtRepository.deleteAll()
 
         testCourt = courtRepository.save(Court(name = "Cancha Central", isIndoor = true))
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now().plusDays(1)
         slot1 = slotRepository.save(Slot(court = testCourt, startTime = now, endTime = now.plusHours(1), price = BigDecimal("10.00")))
         slot2 = slotRepository.save(Slot(court = testCourt, startTime = now.plusHours(1), endTime = now.plusHours(2), price = BigDecimal("12.00")))
         slot3 = slotRepository.save(Slot(court = testCourt, startTime = now.plusHours(2), endTime = now.plusHours(3), price = BigDecimal("15.00")))
