@@ -25,7 +25,9 @@ fun Reservation.toDto() = ReservationDto(
     cognitoUserId = cognitoUserId,
     gameType = gameType,
     status = status,
-    createdAt = createdAt
+    createdAt = createdAt,
+    slot = slot.toDto(false),
+    court = slot.court.toDto()
 )
 
 fun GameRecord.toDto() = GameRecordDto(

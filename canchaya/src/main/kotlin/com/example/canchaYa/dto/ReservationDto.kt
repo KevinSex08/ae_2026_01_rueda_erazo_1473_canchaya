@@ -10,7 +10,9 @@ data class ReservationDto(
     val cognitoUserId: String,
     val gameType: GameType,
     val status: ReservationStatus,
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
+    val slot: SlotDto? = null,
+    val court: CourtDto? = null
 )
 
 data class ReservationRequest(
