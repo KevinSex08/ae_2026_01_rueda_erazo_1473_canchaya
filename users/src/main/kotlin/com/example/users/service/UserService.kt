@@ -32,8 +32,10 @@ class UserService(private val userRepository: UserRepository) {
         } else {
             // Auto-registro silencioso (First-time login)
             val email = jwt.getClaimAsString("email") ?: "no-email@canchaya.com"
-            val username = jwt.getClaimAsString("cognito:username") ?: "Jugador"
-            
+            // Extraer el nombre real (name) o usar el prefijo del correo como fallback
+            val username = jwt.getClaimAsString("name") 
+                ?: jwt.getClaimAsString("given_name") 
+                ?: email.substringBefore("@")
             // Asignar rol basado en los grupos de cognito
             val groups = jwt.getClaimAsStringList("cognito:groups") ?: emptyList()
             val role = if (groups.contains("ADMIN")) "ADMIN" else "PLAYER"
