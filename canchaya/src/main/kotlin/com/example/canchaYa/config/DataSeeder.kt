@@ -17,28 +17,31 @@ class DataSeeder(
 ) : CommandLineRunner {
 
     override fun run(vararg args: String) {
-        if (courtRepository.count() > 0) {
-            println("Database already seeded. Skipping data seeding.")
+        val courts = courtRepository.findAll()
+        val savedCourts = if (courts.isEmpty()) {
+            println("Seeding database with realistic courts for CanchaYA...")
+            val courtsToCreate = listOf(
+                Court(name = "CanchaYA - Cristal Indoor 1", isIndoor = true, pricePerHour = BigDecimal("40.00")),
+                Court(name = "CanchaYA - Panorámica Indoor 2", isIndoor = true, pricePerHour = BigDecimal("45.00")),
+                Court(name = "CanchaYA - Cristal Outdoor 3", isIndoor = false, pricePerHour = BigDecimal("25.00")),
+                Court(name = "CanchaYA - Muro Clásico Outdoor 4", isIndoor = false, pricePerHour = BigDecimal("20.00"))
+            )
+            courtRepository.saveAll(courtsToCreate).also {
+                println("Created ${it.size} courts for CanchaYA.")
+            }
+        } else {
+            courts
+        }
+
+        val today = LocalDate.now()
+        val hasFutureSlots = slotRepository.findAll().any { it.startTime.isAfter(today.atStartOfDay()) }
+        if (hasFutureSlots) {
+            println("Database already has future slots. Skipping slot seeding.")
             return
         }
 
-        println("Seeding database with realistic courts and slots for complex CanchaYA...")
-
-        // Define 15 realistic courts belonging to the CanchaYA complex
-        val courtsToCreate = listOf(
-            // 4 realistic courts belonging to the CanchaYA complex
-            Court(name = "CanchaYA - Cristal Indoor 1", isIndoor = true, pricePerHour = BigDecimal("40.00")),
-            Court(name = "CanchaYA - Panorámica Indoor 2", isIndoor = true, pricePerHour = BigDecimal("45.00")),
-            Court(name = "CanchaYA - Cristal Outdoor 3", isIndoor = false, pricePerHour = BigDecimal("25.00")),
-            Court(name = "CanchaYA - Muro Clásico Outdoor 4", isIndoor = false, pricePerHour = BigDecimal("20.00"))
-        )
-
-        // Save all courts first
-        val savedCourts = courtRepository.saveAll(courtsToCreate)
-        println("Created ${savedCourts.size} courts for CanchaYA.")
-
+        println("Seeding database with new future slots for CanchaYA...")
         val slotsToCreate = mutableListOf<Slot>()
-        val today = LocalDate.now()
 
         // Loop over the next 7 days (including today)
         for (dayOffset in 0..6) {
