@@ -10,9 +10,17 @@ data class GameRecordDto(
     val actualEndTime: LocalDateTime?,
     val teamAScore: Int,
     val teamBScore: Int,
-    val winnerTeam: Team
+    val winnerTeam: Team,
+    val additionalStats: String?
 )
 
 data class GameRecordRequest(
     val reservationId: Long
+)
+
+data class UpdateScoreRequest(
+    val teamAScore: Int,
+    val teamBScore: Int,
+    val winnerTeam: Team,
+    val additionalStats: String?
 )

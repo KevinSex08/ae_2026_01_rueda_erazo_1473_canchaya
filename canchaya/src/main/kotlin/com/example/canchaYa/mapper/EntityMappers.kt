@@ -35,7 +35,8 @@ fun GameRecord.toDto() = GameRecordDto(
     actualEndTime = actualEndTime,
     teamAScore = teamAScore,
     teamBScore = teamBScore,
-    winnerTeam = winnerTeam
+    winnerTeam = winnerTeam,
+    additionalStats = additionalStats
 )
 
 fun Player.toDto() = PlayerDto(

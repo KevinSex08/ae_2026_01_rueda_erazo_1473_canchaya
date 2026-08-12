@@ -13,6 +13,14 @@ class SlotController(private val slotService: SlotService) {
     @GetMapping
     fun getAllSlots(): List<SlotDto> = slotService.getAllSlots()
 
+    @GetMapping("/available")
+    fun getAvailableSlots(
+        @RequestParam(required = false) courtId: Long?,
+        @RequestParam(required = false) date: String?
+    ): List<SlotDto> {
+        return slotService.getAvailableSlots(courtId, date)
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createSlot(@RequestBody request: SlotRequest): SlotDto = slotService.createSlot(request)

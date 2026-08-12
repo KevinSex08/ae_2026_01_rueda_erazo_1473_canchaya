@@ -59,6 +59,17 @@ class GameRecordService(
         return gameRecordRepository.save(gameRecord).toDto()
     }
 
+    fun updateScore(id: Long, request: com.example.canchaYa.dto.UpdateScoreRequest): GameRecordDto {
+        val gameRecord = gameRecordRepository.findById(id).orElseThrow {
+            ResourceNotFoundException("GameRecord with id $id not found")
+        }
+        gameRecord.teamAScore = request.teamAScore
+        gameRecord.teamBScore = request.teamBScore
+        gameRecord.winnerTeam = request.winnerTeam
+        gameRecord.additionalStats = request.additionalStats
+        return gameRecordRepository.save(gameRecord).toDto()
+    }
+
     fun deleteGameRecord(id: Long) {
         val gameRecord = gameRecordRepository.findById(id).orElseThrow {
             ResourceNotFoundException("GameRecord with id $id not found")
