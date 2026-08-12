@@ -5,10 +5,16 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.http.converter.HttpMessageNotReadableException
 import java.time.LocalDateTime
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadable(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity(ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Invalid JSON payload format", LocalDateTime.now()), HttpStatus.BAD_REQUEST)
+    }
 
     @ExceptionHandler(ResourceNotFoundException::class)
     fun handleResourceNotFound(ex: ResourceNotFoundException): ResponseEntity<ErrorResponse> {
