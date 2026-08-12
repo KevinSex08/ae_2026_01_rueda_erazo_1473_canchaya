@@ -44,8 +44,18 @@ class ReservationService(
             throw IllegalArgumentException("Cannot create a reservation for a past time")
         }
 
-        // Validate duplicates and availability (Regla 3: Concurrencia - PENDING bloquea)
+        // Regla 3: Límite de reservas activas por jugador (Máximo 3)
         val allReservations = reservationRepository.findAll()
+        val activeUserReservations = allReservations.count {
+            it.cognitoUserId == cognitoUserId &&
+            it.status in listOf(ReservationStatus.PENDING, ReservationStatus.CONFIRMED) &&
+            !it.slot.startTime.isBefore(now)
+        }
+        if (activeUserReservations >= 3) {
+            throw ConflictException("You already have the maximum allowed number of active reservations (3). Please play or cancel an existing reservation first.")
+        }
+
+        // Validate duplicates and availability (Regla 4: Concurrencia - PENDING bloquea)
         for (slotId in request.slotIds) {
             // Check if slot is already confirmed or pending
             val isUnavailable = allReservations.any {
@@ -72,15 +82,17 @@ class ReservationService(
             slot2 = slot2,
             cognitoUserId = cognitoUserId,
             gameType = request.gameType,
-            status = ReservationStatus.PENDING
+            status = ReservationStatus.CONFIRMED
         )
         return reservationRepository.save(reservation).toDto()
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     fun getMyReservations(cognitoUserId: String): List<ReservationDto> {
         return reservationRepository.findByCognitoUserId(cognitoUserId).map { it.toDto() }
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     fun getReservationById(id: Long, cognitoUserId: String, isAdmin: Boolean): ReservationDto {
         val reservation = reservationRepository.findById(id).orElseThrow {
             ResourceNotFoundException("Reservation with id $id not found")

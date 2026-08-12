@@ -42,6 +42,11 @@ class GlobalExceptionHandler {
         return ResponseEntity(ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.message ?: "Bad Request", LocalDateTime.now()), HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(ConflictException::class)
+    fun handleConflict(ex: ConflictException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity(ErrorResponse(HttpStatus.CONFLICT.value(), ex.message ?: "Conflict", LocalDateTime.now()), HttpStatus.CONFLICT)
+    }
+
     @ExceptionHandler(Exception::class)
     fun handleGenericException(ex: Exception): ResponseEntity<ErrorResponse> {
         // Prevent stacktrace leak (500)
