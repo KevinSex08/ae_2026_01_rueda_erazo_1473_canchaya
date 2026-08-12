@@ -29,6 +29,10 @@ class GameRecordController(private val gameRecordService: GameRecordService) {
     fun finishGame(@PathVariable id: Long): GameRecordDto =
         gameRecordService.finishGame(id)
 
+    @PutMapping("/{id}/score")
+    fun updateScore(@PathVariable id: Long, @RequestBody request: com.example.canchaYa.dto.UpdateScoreRequest): GameRecordDto =
+        gameRecordService.updateScore(id, request)
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteGameRecord(@PathVariable id: Long) {

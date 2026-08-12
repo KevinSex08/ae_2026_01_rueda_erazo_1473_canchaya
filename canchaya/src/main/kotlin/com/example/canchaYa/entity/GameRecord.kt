@@ -30,5 +30,8 @@ class GameRecord(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "winner_team", nullable = false)
-    var winnerTeam: Team = Team.NONE
+    var winnerTeam: Team = Team.NONE,
+
+    @Column(name = "additional_stats", columnDefinition = "TEXT")
+    var additionalStats: String? = null
 ) : BaseEntity()
