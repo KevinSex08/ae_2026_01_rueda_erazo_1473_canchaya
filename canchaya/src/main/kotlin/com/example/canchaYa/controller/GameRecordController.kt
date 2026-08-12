@@ -17,6 +17,12 @@ class GameRecordController(private val gameRecordService: GameRecordService) {
     fun createGameRecord(@RequestBody request: GameRecordRequest): GameRecordDto =
         gameRecordService.createGameRecord(request)
 
+    @GetMapping("/my")
+    fun getMyGameRecords(@org.springframework.security.core.annotation.AuthenticationPrincipal jwt: org.springframework.security.oauth2.jwt.Jwt): List<GameRecordDto> {
+        val userId = jwt.subject ?: jwt.getClaimAsString("username") ?: "unknown"
+        return gameRecordService.getMyGameRecords(userId)
+    }
+
     @GetMapping("/{id}")
     fun getGameRecordById(@PathVariable id: Long): GameRecordDto =
         gameRecordService.getGameRecordById(id)

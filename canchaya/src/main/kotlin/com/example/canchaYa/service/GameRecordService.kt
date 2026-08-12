@@ -26,6 +26,11 @@ class GameRecordService(
 ) {
 
     fun createGameRecord(request: GameRecordRequest): GameRecordDto {
+        val existing = gameRecordRepository.findByReservationId(request.reservationId)
+        if (existing != null) {
+            return existing.toDto()
+        }
+
         val reservation = reservationRepository.findById(request.reservationId).orElseThrow {
             ResourceNotFoundException("Reservation with id ${request.reservationId} not found")
         }
@@ -33,6 +38,10 @@ class GameRecordService(
             reservation = reservation
         )
         return gameRecordRepository.save(gameRecord).toDto()
+    }
+
+    fun getMyGameRecords(cognitoUserId: String): List<GameRecordDto> {
+        return gameRecordRepository.findByReservation_CognitoUserId(cognitoUserId).map { it.toDto() }
     }
 
     fun getGameRecordById(id: Long): GameRecordDto {

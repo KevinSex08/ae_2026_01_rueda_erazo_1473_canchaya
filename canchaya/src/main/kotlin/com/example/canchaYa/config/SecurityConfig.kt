@@ -62,9 +62,11 @@ class SecurityConfig {
 
                 // Game Records endpoints
                 auth.requestMatchers(HttpMethod.POST, "/api/v1/game-records").hasRole("ADMIN")
+                auth.requestMatchers(HttpMethod.GET, "/api/v1/game-records/my").hasRole("PLAYER")
                 auth.requestMatchers(HttpMethod.GET, "/api/v1/game-records/*").hasRole("PLAYER")
                 auth.requestMatchers(HttpMethod.PATCH, "/api/v1/game-records/*/start").hasRole("ADMIN")
                 auth.requestMatchers(HttpMethod.PATCH, "/api/v1/game-records/*/finish").hasRole("ADMIN")
+                auth.requestMatchers(HttpMethod.PUT, "/api/v1/game-records/*/score").hasRole("ADMIN")
                 auth.requestMatchers(HttpMethod.DELETE, "/api/v1/game-records/*").hasRole("ADMIN")
 
                 // Players endpoints

@@ -5,4 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface GameRecordRepository : JpaRepository<GameRecord, Long>
+interface GameRecordRepository : JpaRepository<GameRecord, Long> {
+    fun findByReservationId(reservationId: Long): GameRecord?
+    fun findByReservation_CognitoUserId(cognitoUserId: String): List<GameRecord>
+}
