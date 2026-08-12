@@ -22,6 +22,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig {
 
     @Bean
+    fun restTemplate(): org.springframework.web.client.RestTemplate {
+        return org.springframework.web.client.RestTemplate()
+    }
+
+    @Bean
     fun securityFilterChain(
         http: HttpSecurity
     ): SecurityFilterChain {
@@ -31,6 +36,9 @@ class SecurityConfig {
             .authorizeHttpRequests { auth ->
                 // Permitir peticiones OPTIONS (Preflight) a cualquier ruta
                 auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Admin endpoints (rutas específicas)
+                auth.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
                 // Courts endpoints - Corregido para aceptar la ruta exacta y subrutas
                 auth.requestMatchers(HttpMethod.GET, "/api/v1/courts", "/api/v1/courts/**").permitAll()
@@ -66,7 +74,7 @@ class SecurityConfig {
             }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
-                    jwt.jwtAuthenticationConverter(customJwtAuthenticationConverter())
+                    jwt.jwtAuthenticationConverter(customJwtAuthenticationConverter(restTemplate()))
                 }
             }
 
@@ -74,7 +82,7 @@ class SecurityConfig {
     }
 
     @Bean
-    fun customJwtAuthenticationConverter(): Converter<Jwt, AbstractAuthenticationToken> {
+    fun customJwtAuthenticationConverter(restTemplate: org.springframework.web.client.RestTemplate): Converter<Jwt, AbstractAuthenticationToken> {
         return Converter { jwt ->
             val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
             grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_")
@@ -82,10 +90,22 @@ class SecurityConfig {
 
             val authorities = grantedAuthoritiesConverter.convert(jwt)?.toMutableList() ?: mutableListOf()
 
-            // Si el usuario no tiene grupos en Cognito, le asignamos ROLE_PLAYER por defecto
-            // para que pueda acceder a /api/v1/reservations/my sin configuraciones extra en AWS.
-            val hasRoles = authorities.any { it.authority?.startsWith("ROLE_") == true }
-            if (!hasRoles) {
+            try {
+                val cognitoSub = jwt.subject
+                val url = "http://users:8081/api/v1/users/internal/roles/$cognitoSub"
+                val response = restTemplate.getForEntity(url, Map::class.java)
+                if (response.statusCode.is2xxSuccessful) {
+                    val dbRole = response.body?.get("role") as? String
+                    if (dbRole == "ADMIN") {
+                        authorities.add(SimpleGrantedAuthority("ROLE_ADMIN"))
+                    } else {
+                        authorities.add(SimpleGrantedAuthority("ROLE_PLAYER"))
+                    }
+                } else {
+                    authorities.add(SimpleGrantedAuthority("ROLE_PLAYER"))
+                }
+            } catch (e: Exception) {
+                // Fail graceful to PLAYER
                 authorities.add(SimpleGrantedAuthority("ROLE_PLAYER"))
             }
 
