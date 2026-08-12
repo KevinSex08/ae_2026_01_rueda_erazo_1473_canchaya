@@ -81,7 +81,7 @@ class SecurityConfig {
 
             // Si el usuario no tiene grupos en Cognito, le asignamos ROLE_PLAYER por defecto
             // para que pueda acceder a /api/v1/reservations/my sin configuraciones extra en AWS.
-            val hasRoles = authorities.any { it.authority.startsWith("ROLE_") }
+            val hasRoles = authorities.any { it.authority?.startsWith("ROLE_") == true }
             if (!hasRoles) {
                 authorities.add(SimpleGrantedAuthority("ROLE_PLAYER"))
             }
